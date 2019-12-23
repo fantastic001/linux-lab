@@ -56,7 +56,7 @@ static struct file_operations fops =
 };
 
 
-static struct semaphore* sem;
+static struct semaphore sem;
 
 
 /** @brief The LKM initialization function
@@ -92,7 +92,7 @@ static int __init helloBBB_init(void){
       return PTR_ERR(ebbcharDevice);
    }
    printk(KERN_INFO "EBBChar: device class created correctly\n"); // Made it! device was initialized
-   sema_init( sem, 1);
+   sema_init( &sem, 1);
    printk("EBBChar: Semaphore initialized");
    return 0;
 }
@@ -111,7 +111,7 @@ static void __exit helloBBB_exit(void){
 
 
 static int dev_open(struct inode *inodep, struct file *filep){
-   down(sem);
+   down(&sem);
    numberOpens++;
    printk(KERN_INFO "EBBChar: Device has been opened %d time(s)\n", numberOpens);
    return 0;
@@ -142,7 +142,7 @@ static ssize_t dev_write(struct file *filep, const char *buffer, size_t len, lof
 }
 
 static int dev_release(struct inode *inodep, struct file *filep){
-   up(sem);
+   up(&sem);
    printk(KERN_INFO "EBBChar: Device successfully closed\n");
    return 0;
 }
